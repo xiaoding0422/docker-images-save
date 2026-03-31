@@ -1,0 +1,26 @@
+name: Save Docker Images
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  save:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull and save images
+        run: |
+          docker pull opengauss/opengauss:5.0.0
+          docker pull alpine:latest
+          docker pull mcr.microsoft.com/dotnet/runtime:8.0
+          
+          docker save opengauss/opengauss:5.0.0 | gzip > opengauss_5.0.0.tar.gz
+          docker save alpine:latest | gzip > alpine_latest.tar.gz
+          docker save mcr.microsoft.com/dotnet/runtime:8.0 | gzip > dotnet_runtime_8.0.tar.gz
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-images
+          path: "*.tar.gz"
+          retention-days: 7
